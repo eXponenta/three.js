@@ -4,6 +4,7 @@
  * @author Tony Parisi / http://www.tonyparisi.com/
  * @author Takahiro / https://github.com/takahirox
  * @author Don McCurdy / https://www.donmccurdy.com
+ * @aauthor Timoshenko Konstantin / https://github.com/eXponenta
  */
 
 THREE.GLTFLoader = ( function () {
@@ -40,6 +41,9 @@ THREE.GLTFLoader = ( function () {
 				resourcePath = THREE.LoaderUtils.extractUrlBase( url );
 
 			}
+			
+			//save progress event ref for passing to another loader 
+			scope.progressEvent = onProgress;
 
 			// Tells the LoadingManager to track an extra item, which resolves after
 			// the model is fully loaded. This means the count of items loaded will
@@ -214,7 +218,8 @@ THREE.GLTFLoader = ( function () {
 
 				path: path || this.resourcePath || '',
 				crossOrigin: this.crossOrigin,
-				manager: this.manager
+				manager: this.manager,
+				onProgress : this.onProgress
 
 			} );
 
@@ -283,7 +288,7 @@ THREE.GLTFLoader = ( function () {
 	 */
 	function GLTFTextureDDSExtension() {
 
-		if ( ! THREE.DDSLoader ) {
+		if ( ! THREE.DDS ) {
 
 			throw new Error( 'THREE.GLTFLoader: Attempting to load .dds texture without importing THREE.DDSLoader' );
 
@@ -1842,7 +1847,7 @@ THREE.GLTFLoader = ( function () {
 
 		return new Promise( function ( resolve, reject ) {
 
-			loader.load( resolveURL( bufferDef.uri, options.path ), resolve, undefined, function () {
+			loader.load( resolveURL( bufferDef.uri, options.path ), resolve, options.onProgress, function () {
 
 				reject( new Error( 'THREE.GLTFLoader: Failed to load buffer "' + bufferDef.uri + '".' ) );
 
@@ -2065,7 +2070,7 @@ THREE.GLTFLoader = ( function () {
 
 			return new Promise( function ( resolve, reject ) {
 
-				loader.load( resolveURL( sourceURI, options.path ), resolve, undefined, reject );
+				loader.load( resolveURL( sourceURI, options.path ), resolve, options.onProgress, reject );
 
 			} );
 
